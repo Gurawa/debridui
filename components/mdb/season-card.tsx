@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Star } from "lucide-react";
 import { memo } from "react";
 import { getPosterUrl } from "@/lib/media/images";
-import { type TraktSeason, traktClient } from "@/lib/trakt";
+import { type TraktSeason, tmdbClient } from "@/lib/tmdb";
 import { cn, formatYear } from "@/lib/utils";
 
 interface SeasonCardProps {
@@ -35,8 +35,8 @@ export const SeasonCard = memo(function SeasonCard({
     const prefetchSeason = () => {
         if (!mediaId) return;
         queryClient.prefetchQuery({
-            queryKey: ["trakt", "season", "episodes", mediaId, season.number],
-            queryFn: () => traktClient.getShowEpisodes(mediaId, season.number),
+            queryKey: ["media", "season", "episodes", mediaId, season.number],
+            queryFn: () => tmdbClient.getShowEpisodes(mediaId, season.number),
         });
     };
 

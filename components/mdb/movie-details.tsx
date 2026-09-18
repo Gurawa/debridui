@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 import { SectionDivider } from "@/components/section-divider";
-import type { TraktMedia } from "@/lib/trakt";
+import type { TraktMedia } from "@/lib/tmdb";
 import { MediaHeader, MediaHeaderSkeleton } from "./media-header";
 import { PeopleSection } from "./people-section";
 import { Sources } from "./sources";

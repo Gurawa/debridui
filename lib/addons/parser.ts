@@ -1,5 +1,5 @@
 import { cdnUrl } from "@/lib/media/images";
-import type { Media, MediaItem } from "@/lib/trakt";
+import type { Media, MediaItem } from "@/lib/tmdb";
 import { formatSize } from "../utils";
 import { type AddonSource, type AddonStream, type CatalogMeta, Resolution, SourceQuality } from "./types";
 

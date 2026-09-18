@@ -6,10 +6,9 @@ import { ScrollCarousel } from "@/components/common/scroll-carousel";
 import { SectionDivider } from "@/components/section-divider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useShowEpisodes, useShowSeasons } from "@/hooks/use-media";
 import { useTMDBEpisodeGroupDetails, useTMDBSeriesEpisodeGroups } from "@/hooks/use-tmdb";
-import { useTraktShowEpisodes, useTraktShowSeasons } from "@/hooks/use-trakt";
-import type { TMDBEpisodeGroupEpisode } from "@/lib/tmdb";
-import type { TraktEpisode, TraktImages, TraktMedia, TraktSeason } from "@/lib/trakt";
+import type { TMDBEpisodeGroupEpisode, TraktEpisode, TraktImages, TraktMedia, TraktSeason } from "@/lib/tmdb";
 import { EpisodeCard } from "./episode-card";
 import { MediaHeader, MediaHeaderSkeleton } from "./media-header";
 import { PeopleSection } from "./people-section";
@@ -76,7 +75,7 @@ const EpisodesSection = memo(function EpisodesSection({
     mediaId: string;
     media: TraktMedia;
 }): React.ReactElement | null {
-    const { data: episodes, isLoading } = useTraktShowEpisodes(mediaId, selectedSeason);
+    const { data: episodes, isLoading } = useShowEpisodes(mediaId, selectedSeason);
 
     if (!isLoading && (!episodes || episodes.length === 0)) return null;
 
@@ -126,7 +125,7 @@ export const ShowDetails = memo(function ShowDetails({ media, mediaId }: ShowDet
     const partParam = searchParams.get("part");
     const [selectedGroup, setSelectedGroup] = useState<string>(groupParam || "default");
     const [selectedGroupIndex, setSelectedGroupIndex] = useState<number>(partParam ? parseInt(partParam, 10) : 0);
-    const { data: seasons, isLoading: seasonsLoading } = useTraktShowSeasons(mediaId);
+    const { data: seasons, isLoading: seasonsLoading } = useShowSeasons(mediaId);
 
     // Derived from URL + seasons. `?season=latest` resolves to the latest season that has
     // already aired — excludes Specials and announced-but-unaired future seasons (no/future

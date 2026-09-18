@@ -84,8 +84,18 @@ export const playbackHistory = pgTable(
     ]
 );
 
-// Trakt-specific metadata for a search-history entry.
-// Future providers slot in here as new members of the union (kind: "file", "query", etc.)
+export type TMDBSearchMetadata = {
+    kind: "tmdb";
+    type: "movie" | "show";
+    slug?: string;
+    imdbId?: string;
+    year?: number;
+    rating?: number;
+    posterUrl?: string;
+    subtitle?: string;
+};
+
+// Trakt-specific metadata for backwards compatibility with historical entries
 export type TraktSearchMetadata = {
     kind: "trakt";
     type: "movie" | "show";
@@ -98,7 +108,7 @@ export type TraktSearchMetadata = {
     subtitle?: string;
 };
 
-export type SearchHistoryMetadata = TraktSearchMetadata;
+export type SearchHistoryMetadata = TMDBSearchMetadata | TraktSearchMetadata;
 
 // Search history table — provider-agnostic. Stores items the user clicked through
 // from a search result so they can be re-surfaced as recent picks.

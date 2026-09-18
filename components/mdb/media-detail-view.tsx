@@ -3,8 +3,8 @@
 import { Suspense } from "react";
 import { MdbFooter } from "@/components/mdb/mdb-footer";
 import { MediaDetails } from "@/components/mdb/media-details";
-import { useTraktMedia } from "@/hooks/use-trakt";
-import type { TraktIdType } from "@/lib/trakt";
+import { useMedia } from "@/hooks/use-media";
+import type { TraktIdType } from "@/lib/tmdb";
 
 interface MediaDetailViewProps {
     id: string;
@@ -14,7 +14,7 @@ interface MediaDetailViewProps {
 
 // Shared detail page body for all media routes (/movies, /shows, /title).
 export function MediaDetailView({ id, type, idType }: MediaDetailViewProps) {
-    const { media, type: resolvedType, error } = useTraktMedia({ id, type, idType });
+    const { media, type: resolvedType, error } = useMedia({ id, type, idType });
 
     return (
         <div className="w-full lg:px-6 max-w-6xl mx-auto">

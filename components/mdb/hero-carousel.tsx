@@ -8,9 +8,9 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { WatchButton } from "@/components/common/watch-button";
 import { Button } from "@/components/ui/button";
 import { Carousel, type CarouselApi, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import { useTraktTrendingMixed } from "@/hooks/use-trakt";
+import { useTrendingMixed } from "@/hooks/use-media";
 import { getBackdropUrl, getPosterUrl } from "@/lib/media/images";
-import type { TraktMediaItem } from "@/lib/trakt";
+import type { TraktMediaItem } from "@/lib/tmdb";
 import { cn } from "@/lib/utils";
 import { HeroCarouselSkeleton } from "./hero-carousel-skeleton";
 
@@ -303,7 +303,7 @@ export const HeroCarousel = memo(function HeroCarousel({ autoFocus = false }: He
         []
     );
 
-    const { data: items, isLoading } = useTraktTrendingMixed(10);
+    const { data: items, isLoading } = useTrendingMixed(10);
 
     const scrollPrev = useCallback(() => api?.scrollPrev(), [api]);
     const scrollNext = useCallback(() => api?.scrollNext(), [api]);

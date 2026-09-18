@@ -1,7 +1,7 @@
 "use client";
 
 import { memo } from "react";
-import type { TraktMedia } from "@/lib/trakt";
+import type { TraktMedia } from "@/lib/tmdb";
 import { MediaHeaderSkeleton } from "./media-header";
 import { MovieDetails } from "./movie-details";
 import { ShowDetails } from "./show-details";

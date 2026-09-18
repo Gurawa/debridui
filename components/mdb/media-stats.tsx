@@ -1,6 +1,6 @@
 "use client";
 
-import type { TraktMedia } from "@/lib/trakt";
+import type { TraktMedia } from "@/lib/tmdb";
 
 interface MediaStatsProps {
     media: TraktMedia;

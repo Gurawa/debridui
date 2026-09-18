@@ -18,7 +18,7 @@ import {
 import type { Addon, TvSearchParams } from "@/lib/addons/types";
 import type { PlaybackHistory } from "@/lib/db/schema";
 import { type StreamingRequest, useStreamingStore } from "@/lib/stores/streaming";
-import { traktClient } from "@/lib/trakt";
+import { tmdbClient } from "@/lib/tmdb";
 
 function formatEpisodeLabel(season: number, episode: number): string {
     return `S${String(season).padStart(2, "0")}E${String(episode).padStart(2, "0")}`;
@@ -44,8 +44,8 @@ function useNextEpisode(
     episode: number | null
 ): TvSearchParams | null {
     const { data: seasons } = useQuery({
-        queryKey: ["trakt", "show", "seasons", imdbId],
-        queryFn: () => traktClient.getShowSeasons(imdbId),
+        queryKey: ["media", "show", "seasons", imdbId],
+        queryFn: () => tmdbClient.getShowSeasons(imdbId),
         staleTime: 24 * 60 * 60 * 1000,
         enabled: type === "show" && !!season && !!episode,
     });

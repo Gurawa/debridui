@@ -24,6 +24,7 @@ interface SearchHistorySectionProps {
 /** Derive the route URL for a history entry. URL structure lives here so it can change without a backfill. */
 function deriveHref(entry: SearchHistory): string {
     switch (entry.metadata.kind) {
+        case "tmdb":
         case "trakt": {
             const m = entry.metadata;
             return `/${m.type}s/${m.slug ?? m.imdbId ?? entry.providerId}`;
@@ -35,6 +36,7 @@ function deriveHref(entry: SearchHistory): string {
 
 function deriveKicker(entry: SearchHistory): string {
     switch (entry.metadata.kind) {
+        case "tmdb":
         case "trakt":
             return entry.metadata.type === "movie" ? "Film" : "Series";
         default:
@@ -43,22 +45,22 @@ function deriveKicker(entry: SearchHistory): string {
 }
 
 function derivePoster(entry: SearchHistory): string | undefined {
-    if (entry.metadata.kind === "trakt") return entry.metadata.posterUrl;
+    if (entry.metadata.kind === "tmdb" || entry.metadata.kind === "trakt") return entry.metadata.posterUrl;
     return undefined;
 }
 
 function deriveSubtitle(entry: SearchHistory): string | undefined {
-    if (entry.metadata.kind === "trakt") return entry.metadata.subtitle;
+    if (entry.metadata.kind === "tmdb" || entry.metadata.kind === "trakt") return entry.metadata.subtitle;
     return undefined;
 }
 
 function deriveYear(entry: SearchHistory): number | undefined {
-    if (entry.metadata.kind === "trakt") return entry.metadata.year;
+    if (entry.metadata.kind === "tmdb" || entry.metadata.kind === "trakt") return entry.metadata.year;
     return undefined;
 }
 
 function deriveRating(entry: SearchHistory): number | undefined {
-    if (entry.metadata.kind === "trakt") return entry.metadata.rating;
+    if (entry.metadata.kind === "tmdb" || entry.metadata.kind === "trakt") return entry.metadata.rating;
     return undefined;
 }
 

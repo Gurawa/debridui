@@ -2,7 +2,7 @@
 
 import { Clapperboard, FolderClosed, Link2, Loader2, type LucideIcon, Magnet, Search } from "lucide-react";
 import type { SearchState } from "@/hooks/use-search-logic";
-import type { TraktSearchResult } from "@/lib/trakt";
+import type { TraktSearchResult } from "@/lib/tmdb";
 import type { DebridFile } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { SearchFileItem } from "./search-file-item";

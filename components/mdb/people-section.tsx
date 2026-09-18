@@ -4,8 +4,8 @@ import { User } from "lucide-react";
 import Link from "next/link";
 import { memo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useTraktPeople } from "@/hooks/use-trakt";
-import type { TraktCastMember, TraktCrewMember } from "@/lib/trakt";
+import { usePeople } from "@/hooks/use-media";
+import type { TraktCastMember, TraktCrewMember } from "@/lib/tmdb";
 
 interface PeopleSectionProps {
     mediaId: string;
@@ -13,7 +13,7 @@ interface PeopleSectionProps {
 }
 
 export const PeopleSection = memo(function PeopleSection({ mediaId, type }: PeopleSectionProps) {
-    const { data: people, isLoading, error } = useTraktPeople(mediaId, type);
+    const { data: people, isLoading, error } = usePeople(mediaId, type);
 
     if (error) {
         return null;

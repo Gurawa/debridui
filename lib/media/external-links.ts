@@ -1,4 +1,4 @@
-import type { TraktIdType } from "@/lib/trakt";
+import type { TraktIdType } from "@/lib/tmdb";
 
 export interface MediaLink {
     idType: TraktIdType;

@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { memo, useState } from "react";
 import { getPosterUrl } from "@/lib/media/images";
-import type { Media } from "@/lib/trakt";
+import type { Media } from "@/lib/tmdb";
 import { cn } from "@/lib/utils";
 
 interface MediaCardProps {

@@ -1,4 +1,4 @@
-import type { MediaImages } from "@/lib/trakt";
+import type { MediaImages } from "@/lib/tmdb";
 
 // -- CDN proxy via wsrv.nl --
 

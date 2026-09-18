@@ -6,7 +6,7 @@ import { useAuthGuaranteed } from "@/components/auth/auth-provider";
 import type TorBoxClient from "@/lib/clients/torbox";
 import type { TorBoxSearchResult } from "@/lib/clients/torbox";
 import { parseMediaLink } from "@/lib/media/external-links";
-import { type TraktSearchResult, traktClient } from "@/lib/trakt";
+import { type TraktSearchResult, tmdbClient } from "@/lib/tmdb";
 import { AccountType, type DebridFile } from "@/lib/types";
 import { getFindTorrentsCacheKey } from "@/lib/utils/cache-keys";
 
@@ -47,8 +47,8 @@ export function useSearchLogic({ query, enabled = true }: UseSearchLogicOptions)
     const link = useMemo(() => parseMediaLink(trimmedQuery), [trimmedQuery]);
 
     const { data: linkMatches, isLoading: isLinkResolving } = useQuery({
-        queryKey: ["trakt", "idLookup", link?.idType, link?.id, link?.type],
-        queryFn: () => traktClient.idLookup(link!.idType, link!.id, link!.type),
+        queryKey: ["media", "idLookup", link?.idType, link?.id, link?.type],
+        queryFn: () => tmdbClient.idLookup(link!.idType, link!.id, link!.type),
         enabled: !!link,
         ...NO_REFETCH_ON_FOCUS,
         staleTime: 60 * 60 * 1000,
@@ -56,8 +56,8 @@ export function useSearchLogic({ query, enabled = true }: UseSearchLogicOptions)
     });
 
     const { data: traktResults, isLoading: isTraktSearching } = useQuery({
-        queryKey: ["trakt", "search", query],
-        queryFn: () => traktClient.search(query, ["movie", "show"]),
+        queryKey: ["media", "search", query],
+        queryFn: () => tmdbClient.search(query, ["movie", "show"]),
         enabled: shouldSearch,
         ...NO_REFETCH_ON_FOCUS,
         staleTime: 5 * 60 * 1000,

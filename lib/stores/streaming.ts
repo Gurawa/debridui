@@ -8,7 +8,7 @@ import type { Addon, AddonSource, TvSearchParams } from "@/lib/addons/types";
 import { openInPlayer } from "@/lib/media/player";
 import { queryClient } from "@/lib/query-client";
 import { selectBestSource } from "@/lib/streaming/source-selector";
-import type { Media } from "@/lib/trakt";
+import type { Media } from "@/lib/tmdb";
 import { FileType, MediaPlayer } from "@/lib/types";
 import { usePreviewStore } from "./preview";
 import { useSettingsStore } from "./settings";

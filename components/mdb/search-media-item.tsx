@@ -4,7 +4,7 @@ import { ArrowUpRight, Film, Star, Tv } from "lucide-react";
 import { memo } from "react";
 import { SearchItemWrapper } from "@/components/search-item-wrapper";
 import { getPosterUrl } from "@/lib/media/images";
-import type { TraktSearchResult } from "@/lib/trakt";
+import type { TraktSearchResult } from "@/lib/tmdb";
 import { cn } from "@/lib/utils";
 
 interface SearchMediaItemProps {
@@ -27,13 +27,14 @@ export const SearchMediaItem = memo(function SearchMediaItem({
     const Icon = type === "movie" ? Film : Tv;
     const posterImage = getPosterUrl(media.images);
     const kicker = type === "movie" ? "Film" : "Series";
+    const mediaId = media.ids?.tmdb || media.ids?.trakt;
 
     return (
         <SearchItemWrapper
             data={result}
             variant={variant}
             onSelect={onSelect}
-            commandValue={`${type}-${media.ids?.trakt}-${media.title}`}
+            commandValue={`${type}-${mediaId}-${media.title}`}
             commandKeywords={[media.title, type, media.year?.toString() || ""]}
             className={className}>
             {/* Poster */}

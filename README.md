@@ -30,7 +30,7 @@ A modern debrid client for managing your files, discovering trending movies and 
 
 ### Media Discovery
 
-- **Trakt.tv catalogue** - Browse trending movies and TV shows
+- **TMDB catalogue** - Browse trending movies and TV shows (powered by The Movie Database)
 - **Smart search** - Find content across multiple sources
 - **Media details** - Cast info, ratings, trailers, and recommendations
 - **Season/episode browser** - Navigate TV shows with ease

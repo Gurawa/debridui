@@ -10,16 +10,16 @@ import { MediaSection } from "@/components/mdb/media-section";
 import { SearchDialog } from "@/components/mdb/search-dialog";
 import { type AddonCatalogDef, catalogSlug, useAddonCatalog, useAddonCatalogDefs } from "@/hooks/use-addons";
 import {
-    useTraktAnticipatedMovies,
-    useTraktAnticipatedShows,
-    useTraktBoxOfficeMovies,
-    useTraktMostWatchedMovies,
-    useTraktMostWatchedShows,
-    useTraktPopularMovies,
-    useTraktPopularShows,
-    useTraktTrendingMovies,
-    useTraktTrendingShows,
-} from "@/hooks/use-trakt";
+    useAnticipatedMovies,
+    useAnticipatedShows,
+    useBoxOfficeMovies,
+    useMostWatchedMovies,
+    useMostWatchedShows,
+    usePopularMovies,
+    usePopularShows,
+    useTrendingMovies,
+    useTrendingShows,
+} from "@/hooks/use-media";
 import { DISCORD_URL } from "@/lib/constants";
 
 const HeroCarousel = dynamic(
@@ -244,15 +244,15 @@ const DashboardPage = memo(function DashboardPage() {
     const [searchOpen, setSearchOpen] = useState(false);
     const openSearch = useCallback(() => setSearchOpen(true), []);
 
-    const trendingMovies = useTraktTrendingMovies(20);
-    const trendingShows = useTraktTrendingShows(20);
-    const popularMovies = useTraktPopularMovies(20);
-    const popularShows = useTraktPopularShows(20);
-    const mostWatchedMovies = useTraktMostWatchedMovies("weekly", 20);
-    const mostWatchedShows = useTraktMostWatchedShows("weekly", 20);
-    const anticipatedMovies = useTraktAnticipatedMovies(20);
-    const anticipatedShows = useTraktAnticipatedShows(20);
-    const boxOffice = useTraktBoxOfficeMovies();
+    const trendingMovies = useTrendingMovies(20);
+    const trendingShows = useTrendingShows(20);
+    const popularMovies = usePopularMovies(20);
+    const popularShows = usePopularShows(20);
+    const mostWatchedMovies = useMostWatchedMovies("weekly", 20);
+    const mostWatchedShows = useMostWatchedShows("weekly", 20);
+    const anticipatedMovies = useAnticipatedMovies(20);
+    const anticipatedShows = useAnticipatedShows(20);
+    const boxOffice = useBoxOfficeMovies();
 
     return (
         <div className="pb-12">

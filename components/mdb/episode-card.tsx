@@ -4,7 +4,7 @@ import { ChevronDown, Play, Star } from "lucide-react";
 import { memo, useState } from "react";
 import { WatchButton } from "@/components/common/watch-button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import type { TraktEpisode, TraktMedia } from "@/lib/trakt";
+import type { TraktEpisode, TraktMedia } from "@/lib/tmdb";
 import { cn, formatLocalizedDate } from "@/lib/utils";
 import { Sources } from "./sources";
 

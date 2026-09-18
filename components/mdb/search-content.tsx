@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { useRecordSearchPick } from "@/hooks/use-search-history";
 import { useSearchLogic } from "@/hooks/use-search-logic";
 import { getPosterUrl } from "@/lib/media/images";
-import type { TraktSearchResult } from "@/lib/trakt";
+import type { TraktSearchResult } from "@/lib/tmdb";
 import type { DebridFile } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { SearchResults } from "./search-results";
@@ -83,16 +83,17 @@ export function SearchContent({
             router.push(`/${type}s/${slug}`);
 
             // Fire-and-forget: record the pick to search history
-            if (media.ids?.trakt) {
+            const idToRecord = media.ids?.tmdb || media.ids?.trakt;
+            if (idToRecord) {
                 recordPick({
-                    provider: "trakt",
-                    providerId: String(media.ids.trakt),
+                    provider: "tmdb",
+                    providerId: String(idToRecord),
                     title: media.title,
                     metadata: {
-                        kind: "trakt",
+                        kind: "tmdb",
                         type,
-                        slug: media.ids.slug,
-                        imdbId: media.ids.imdb,
+                        slug: media.ids?.slug,
+                        imdbId: media.ids?.imdb,
                         year: media.year,
                         rating: media.rating,
                         subtitle: media.overview ?? undefined,

@@ -9,9 +9,9 @@ import { MdbFooter } from "@/components/mdb/mdb-footer";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useTraktPerson, useTraktPersonMovies, useTraktPersonShows } from "@/hooks/use-trakt";
+import { usePerson, usePersonMovies, usePersonShows } from "@/hooks/use-media";
 import { getPosterUrl } from "@/lib/media/images";
-import type { TraktMedia, TraktPersonFull, TraktPersonMovieCredit, TraktPersonShowCredit } from "@/lib/trakt";
+import type { TraktMedia, TraktPersonFull, TraktPersonMovieCredit, TraktPersonShowCredit } from "@/lib/tmdb";
 import { calculateAge, formatLocalizedDate } from "@/lib/utils";
 
 // Person Header Component
@@ -432,8 +432,8 @@ const CreditsGrid = memo(function CreditsGrid({
 
 // Filmography Tabs Component
 const FilmographyTabs = memo(function FilmographyTabs({ slug }: { slug: string }) {
-    const { data: movieCredits, isLoading: moviesLoading } = useTraktPersonMovies(slug);
-    const { data: showCredits, isLoading: showsLoading } = useTraktPersonShows(slug);
+    const { data: movieCredits, isLoading: moviesLoading } = usePersonMovies(slug);
+    const { data: showCredits, isLoading: showsLoading } = usePersonShows(slug);
 
     const isLoading = moviesLoading || showsLoading;
 
@@ -660,7 +660,7 @@ const PersonPage = memo(function PersonPage() {
     const params = useParams();
     const slug = params.slug as string;
 
-    const { data: person, isLoading, error } = useTraktPerson(slug);
+    const { data: person, isLoading, error } = usePerson(slug);
 
     if (error) {
         return (
