@@ -43,12 +43,10 @@ export const AccountSwitcher = React.memo(function AccountSwitcher() {
                                 <ServiceIcon type={currentAccount.type as AccountType} className="size-5" />
                             </div>
                             <div className="grid flex-1 text-left text-sm leading-tight min-w-0">
-                                <span className="truncate font-light" title={currentAccount.name}>
-                                    {currentAccount.name}
-                                </span>
-                                <span className="truncate text-xs text-muted-foreground">
+                                <span className="truncate font-light" title={formatAccountType(currentAccount.type)}>
                                     {formatAccountType(currentAccount.type)}
                                 </span>
+                                <span className="truncate text-xs text-muted-foreground">Active Debrid Service</span>
                             </div>
                             <ChevronsUpDown className="ml-auto size-4 text-muted-foreground shrink-0" />
                         </SidebarMenuButton>
@@ -74,9 +72,11 @@ export const AccountSwitcher = React.memo(function AccountSwitcher() {
                                         <ServiceIcon type={account.type as AccountType} className="size-4" />
                                     </div>
                                     <div className="flex flex-col min-w-0 flex-1">
-                                        <span className="text-sm font-light truncate">{account.name}</span>
-                                        <span className="text-xs text-muted-foreground truncate">
+                                        <span className="text-sm font-light truncate">
                                             {formatAccountType(account.type)}
+                                        </span>
+                                        <span className="text-xs text-muted-foreground truncate">
+                                            {account.id === currentAccount.id ? "Active" : "Connected"}
                                         </span>
                                     </div>
                                 </div>

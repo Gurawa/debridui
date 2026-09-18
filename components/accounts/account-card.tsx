@@ -70,9 +70,9 @@ export const AccountCard = React.memo(function AccountCard({ account, isCurrentA
                     <div className="flex-1 min-w-0">
                         {userInfo ? (
                             <>
-                                <h3 className="text-sm sm:text-base font-light">{userInfo.name}</h3>
+                                <h3 className="text-sm sm:text-base font-light">{formatAccountType(account.type)}</h3>
                                 <div className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
-                                    {formatAccountType(account.type)}
+                                    {isCurrentAccount ? "Active Debrid Service" : "Connected Debrid Service"}
                                 </div>
                             </>
                         ) : (
@@ -106,15 +106,9 @@ export const AccountCard = React.memo(function AccountCard({ account, isCurrentA
                     </div>
                 </div>
 
-                {/* Stats Grid - 3 blocks: Email, Plan, Expires */}
+                {/* Stats Grid - 2 blocks: Plan, Expires */}
                 {userInfo ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-4 lg:gap-6">
-                        <div className="col-span-2 sm:col-span-1 min-w-0 pl-2.5 sm:pl-3 border-l border-border/50">
-                            <div className="text-[10px] tracking-widest uppercase text-muted-foreground mb-0.5">
-                                Email
-                            </div>
-                            <div className="text-xs sm:text-sm break-all sm:break-normal">{userInfo.email}</div>
-                        </div>
+                    <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:gap-6">
                         <div className="min-w-0 pl-2.5 sm:pl-3 border-l border-border/50">
                             <div className="text-[10px] tracking-widest uppercase text-muted-foreground mb-0.5">
                                 Plan
@@ -151,11 +145,7 @@ export const AccountCard = React.memo(function AccountCard({ account, isCurrentA
                         </div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-4 lg:gap-6">
-                        <div className="col-span-2 sm:col-span-1 pl-2.5 sm:pl-3 border-l border-border/50">
-                            <Skeleton className="h-2.5 w-12 mb-1.5" />
-                            <Skeleton className="h-3.5 sm:h-4 w-48 sm:w-32" />
-                        </div>
+                    <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:gap-6">
                         <div className="pl-2.5 sm:pl-3 border-l border-border/50">
                             <Skeleton className="h-2.5 w-12 mb-1.5" />
                             <Skeleton className="h-3.5 sm:h-4 w-16" />

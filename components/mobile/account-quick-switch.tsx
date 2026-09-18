@@ -31,7 +31,7 @@ export function AccountQuickSwitch() {
             <button
                 type="button"
                 onClick={() => setOpen(true)}
-                aria-label={`Account: ${currentAccount.name}. Tap to switch.`}
+                aria-label={`Account: ${formatAccountType(currentAccount.type)}. Tap to switch.`}
                 className="relative size-9 rounded-sm cursor-pointer hover:bg-muted/40 active:bg-muted/50 transition-colors flex items-center justify-center">
                 <Avatar className="size-8 rounded-sm border border-border/50">
                     <AvatarImage src={userImage} alt={userName} />
@@ -106,10 +106,10 @@ export function AccountQuickSwitch() {
                                             </span>
                                             <span className="flex-1 min-w-0 text-left">
                                                 <span className="block text-sm font-light truncate">
-                                                    {account.name}
+                                                    {formatAccountType(account.type)}
                                                 </span>
                                                 <span className="block text-xs text-muted-foreground truncate">
-                                                    {formatAccountType(account.type)}
+                                                    {isCurrent ? "Active" : "Connected"}
                                                 </span>
                                             </span>
                                             {isCurrent && (
