@@ -453,7 +453,20 @@ export class TMDBClient {
         id: string | number,
         mediaType?: "movie" | "show"
     ): Promise<{ tmdbId: number; type: "movie" | "show" } | null> {
-        const idStr = String(id).trim();
+        let idStr = String(id).trim();
+        try {
+            idStr = decodeURIComponent(idStr);
+        } catch {
+            // ignore
+        }
+
+        // Check if prefixed with tmdb: (e.g. tmdb:1108427 or tmdb-1108427)
+        if (idStr.toLowerCase().startsWith("tmdb:") || idStr.toLowerCase().startsWith("tmdb-")) {
+            const parsed = Number.parseInt(idStr.slice(5).trim(), 10);
+            if (!Number.isNaN(parsed) && parsed > 0) {
+                return { tmdbId: parsed, type: mediaType || "movie" };
+            }
+        }
 
         // If it starts with tt..., lookup via /find
         if (idStr.startsWith("tt")) {
@@ -484,6 +497,34 @@ export class TMDBClient {
         }
 
         return null;
+    }
+
+    private async toNumericId(id: string | number, type: "movie" | "show"): Promise<number> {
+        let idStr = String(id).trim();
+        try {
+            idStr = decodeURIComponent(idStr);
+        } catch {
+            // ignore
+        }
+
+        if (idStr.toLowerCase().startsWith("tmdb:") || idStr.toLowerCase().startsWith("tmdb-")) {
+            const parsed = Number.parseInt(idStr.slice(5).trim(), 10);
+            if (!Number.isNaN(parsed) && parsed > 0) return parsed;
+        }
+
+        if (idStr.startsWith("tt") || !idStr.match(/^\d+$/)) {
+            const resolved = await this.resolveId(idStr, type);
+            if (!resolved) {
+                throw new TMDBError(
+                    `${type === "movie" ? "Movie" : "Show"} not found: ${id}`,
+                    404,
+                    `/${type === "movie" ? "movie" : "tv"}/${id}`
+                );
+            }
+            return resolved.tmdbId;
+        }
+
+        return Number.parseInt(idStr, 10);
     }
 
     // Search
@@ -614,14 +655,7 @@ export class TMDBClient {
 
     // Movie Details
     public async getMovie(id: string | number): Promise<TraktMedia> {
-        let numericId: number;
-        if (typeof id === "string" && (id.startsWith("tt") || !id.match(/^\d+$/))) {
-            const resolved = await this.resolveId(id, "movie");
-            if (!resolved) throw new TMDBError(`Movie not found: ${id}`, 404, `/movie/${id}`);
-            numericId = resolved.tmdbId;
-        } else {
-            numericId = Number.parseInt(String(id), 10);
-        }
+        const numericId = await this.toNumericId(id, "movie");
 
         // biome-ignore lint/suspicious/noExplicitAny: response
         const res = await this.makeRequest<any>(`/movie/${numericId}`, {
@@ -632,14 +666,7 @@ export class TMDBClient {
 
     // Show Details
     public async getShow(id: string | number): Promise<TraktMedia> {
-        let numericId: number;
-        if (typeof id === "string" && (id.startsWith("tt") || !id.match(/^\d+$/))) {
-            const resolved = await this.resolveId(id, "show");
-            if (!resolved) throw new TMDBError(`Show not found: ${id}`, 404, `/tv/${id}`);
-            numericId = resolved.tmdbId;
-        } else {
-            numericId = Number.parseInt(String(id), 10);
-        }
+        const numericId = await this.toNumericId(id, "show");
 
         // biome-ignore lint/suspicious/noExplicitAny: response
         const res = await this.makeRequest<any>(`/tv/${numericId}`, {
@@ -651,12 +678,10 @@ export class TMDBClient {
     // Seasons
     public async getShowSeasons(id: string | number): Promise<TraktSeason[]> {
         let numericId: number;
-        if (typeof id === "string" && (id.startsWith("tt") || !id.match(/^\d+$/))) {
-            const resolved = await this.resolveId(id, "show");
-            if (!resolved) return [];
-            numericId = resolved.tmdbId;
-        } else {
-            numericId = Number.parseInt(String(id), 10);
+        try {
+            numericId = await this.toNumericId(id, "show");
+        } catch {
+            return [];
         }
 
         // biome-ignore lint/suspicious/noExplicitAny: response
@@ -685,12 +710,10 @@ export class TMDBClient {
     // Episodes
     public async getShowEpisodes(id: string | number, season: number): Promise<TraktEpisode[]> {
         let numericId: number;
-        if (typeof id === "string" && (id.startsWith("tt") || !id.match(/^\d+$/))) {
-            const resolved = await this.resolveId(id, "show");
-            if (!resolved) return [];
-            numericId = resolved.tmdbId;
-        } else {
-            numericId = Number.parseInt(String(id), 10);
+        try {
+            numericId = await this.toNumericId(id, "show");
+        } catch {
+            return [];
         }
 
         // biome-ignore lint/suspicious/noExplicitAny: response
@@ -720,13 +743,10 @@ export class TMDBClient {
     // People / Credits
     public async getPeople(id: string | number, type: "movies" | "shows" = "movies"): Promise<TraktCastAndCrew> {
         let numericId: number;
-        const mediaType = type === "movies" ? "movie" : "show";
-        if (typeof id === "string" && (id.startsWith("tt") || !id.match(/^\d+$/))) {
-            const resolved = await this.resolveId(id, mediaType);
-            if (!resolved) return { cast: [], crew: {} };
-            numericId = resolved.tmdbId;
-        } else {
-            numericId = Number.parseInt(String(id), 10);
+        try {
+            numericId = await this.toNumericId(id, type === "movies" ? "movie" : "show");
+        } catch {
+            return { cast: [], crew: {} };
         }
 
         const endpoint = type === "movies" ? `/movie/${numericId}/credits` : `/tv/${numericId}/credits`;

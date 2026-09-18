@@ -90,12 +90,25 @@ function showSourceToast({ source, title, isCached, autoPlay, allowUncached, onP
     const cacheStatus = isCached ? "Cached" : "Not cached";
     const description = `${meta} · ${cacheStatus}`.replace(/^ · /, "");
 
+    const copyLinkAction = async () => {
+        if (!source.url) return;
+        try {
+            await navigator.clipboard.writeText(source.url);
+            toast.success("Stream link copied!", {
+                description: "Paste it in your favourite player and stream",
+                duration: 4000,
+            });
+        } catch {
+            toast.error("Failed to copy link");
+        }
+    };
+
     if (isCached || allowUncached) {
         toast.success(title, {
             id: toastId ?? undefined,
             position: TOAST_POSITION,
             description,
-            action: { label: "Play", onClick: onPlay },
+            action: { label: "Copy Link", onClick: copyLinkAction },
             duration: Infinity,
         });
     } else {
@@ -103,7 +116,7 @@ function showSourceToast({ source, title, isCached, autoPlay, allowUncached, onP
             id: toastId ?? undefined,
             position: TOAST_POSITION,
             description,
-            action: { label: "Play Anyway", onClick: onPlay },
+            action: { label: "Copy Link", onClick: copyLinkAction },
             duration: Infinity,
         });
     }
@@ -125,10 +138,9 @@ export const useStreamingStore = create<StreamingState>()((set, get) => ({
         const fileName = metaLabel ? `${title} [${metaLabel}]` : title;
 
         if (mediaPlayer === MediaPlayer.BROWSER) {
-            usePreviewStore.getState().openSinglePreview({
-                url: source.url,
-                title: fileName,
-                fileType: FileType.VIDEO,
+            navigator.clipboard.writeText(source.url);
+            toast.success("Stream link copied!", {
+                description: "Paste it in your favourite player and stream",
             });
         } else {
             openInPlayer({ url: source.url, fileName, player: mediaPlayer });

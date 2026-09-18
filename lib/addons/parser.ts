@@ -200,10 +200,16 @@ export function parseStreams(streams: AddonStream[], addonId: string, addonName:
 export function catalogMetasToMediaItems(metas: CatalogMeta[]): MediaItem[] {
     return metas.map((meta) => {
         const type = meta.type === "series" ? "show" : "movie";
+        const isTmdb = meta.id?.toLowerCase().startsWith("tmdb:");
+        const tmdbId = isTmdb ? Number.parseInt(meta.id.slice(5).trim(), 10) : undefined;
         const media: Media = {
             title: meta.name,
             year: parseInt(meta.releaseInfo || "", 10) || undefined,
-            ids: { imdb: meta.id, slug: meta.id },
+            ids: {
+                imdb: meta.id?.startsWith("tt") ? meta.id : undefined,
+                tmdb: tmdbId && !Number.isNaN(tmdbId) ? tmdbId : undefined,
+                slug: isTmdb && tmdbId && !Number.isNaN(tmdbId) ? String(tmdbId) : meta.id,
+            },
             images: meta.poster ? { poster: [cdnUrl(meta.poster, { w: 300, h: 450 })] } : undefined,
             rating: meta.imdbRating ? parseFloat(meta.imdbRating) : undefined,
             genres: meta.genres,

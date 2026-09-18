@@ -128,13 +128,14 @@ const settingsConfig: SettingsConfig = {
         defaultValue: true,
     },
     mediaPlayer: {
-        defaultValue: MediaPlayer.BROWSER,
+        defaultValue: MediaPlayer.VLC,
         presets: [
-            {
-                value: MediaPlayer.BROWSER,
-                label: "Browser Preview",
-                description: "All platforms - Built-in browser preview with controls",
-            },
+            // Browser preview removed per user request
+            // {
+            //     value: MediaPlayer.BROWSER,
+            //     label: "Browser Preview",
+            //     description: "All platforms - Built-in browser preview with controls",
+            // },
             {
                 value: MediaPlayer.VLC,
                 label: "VLC",

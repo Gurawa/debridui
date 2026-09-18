@@ -14,7 +14,7 @@ type Tab =
 
 const TABS: Tab[] = [
     { kind: "link", key: "home", label: "Home", href: "/dashboard", icon: HomeIcon, matchPrefix: "/dashboard" },
-    { kind: "link", key: "files", label: "Files", href: "/files", icon: FolderOpen, matchPrefix: "/files" },
+    // { kind: "link", key: "files", label: "Files", href: "/files", icon: FolderOpen, matchPrefix: "/files" },
     { kind: "link", key: "search", label: "Search", href: "/search", icon: SearchIcon, matchPrefix: "/search" },
     { kind: "link", key: "links", label: "Links", href: "/links", icon: Link2, matchPrefix: "/links" },
     { kind: "more", key: "more", label: "More", icon: MoreHorizontal },
@@ -34,7 +34,7 @@ export function BottomTabBar() {
             <nav
                 aria-label="Primary"
                 className="md:hidden fixed inset-x-0 bottom-0 z-50 border-t border-border/50 bg-background/85 backdrop-blur-xl backdrop-saturate-150 supports-backdrop-filter:bg-background/75 pb-safe">
-                <ul className="grid grid-cols-5 h-14">
+                <ul className="grid grid-cols-4 h-14">
                     {TABS.map((tab) => {
                         const Icon = tab.icon;
                         const active = tab.kind === "more" ? moreOpen : isActive(tab);

@@ -3,12 +3,13 @@
 import {
     AlertTriangle,
     CheckIcon,
+    Copy,
+    Download,
     FolderOpenIcon,
     HardDriveDownloadIcon,
     LayersIcon,
     ListIcon,
     Loader2,
-    PlayIcon,
     Plus,
     Trash2Icon,
     Wand2,
@@ -29,6 +30,32 @@ import { type StreamingRequest, useStreamingStore } from "@/lib/stores/streaming
 import { selectBestSource } from "@/lib/streaming/source-selector";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+
+const copyStreamLink = async (url: string) => {
+    try {
+        await navigator.clipboard.writeText(url);
+        toast.success("Stream link copied!", {
+            description: "Paste it in your favourite player and stream",
+            duration: 4000,
+        });
+        return true;
+    } catch {
+        toast.error("Failed to copy link to clipboard");
+        return false;
+    }
+};
+
+const triggerDownload = (url: string, title?: string) => {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = title || "";
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    toast.info("Download started");
+};
 
 interface SourcesProps {
     request: StreamingRequest;
@@ -238,6 +265,16 @@ export function QuickPlaySkeleton() {
 export function SimpleSources({ sources, request }: { sources: AddonSource[]; request: StreamingRequest }) {
     const [pickedTier, setPickedTier] = useState<Tier | null>(null);
     const [pickedKey, setPickedKey] = useState<string | null>(null);
+    const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+    const handleCopy = async (url: string, key: string) => {
+        const ok = await copyStreamLink(url);
+        if (ok) {
+            setCopiedKey(key);
+            setTimeout(() => setCopiedKey(null), 2500);
+        }
+    };
+
     const streamingSettings = useSettingsStore((s) => s.settings.streaming);
 
     const pinned = useRef<AddonSource | null>(null);
@@ -332,20 +369,52 @@ export function SimpleSources({ sources, request }: { sources: AddonSource[]; re
             action={
                 <>
                     {active.url && (
-                        <Button
-                            size="lg"
-                            className="h-11 w-full sm:h-10"
-                            onClick={() => useStreamingStore.getState().playSource(active, request)}>
-                            <PlayIcon className="size-4 fill-current" />
-                            Play {active.size ? `(${active.size})` : `(${tier.label})`}
-                        </Button>
+                        <>
+                            <Button
+                                size="lg"
+                                className="h-11 w-full sm:h-10 gap-2 font-medium"
+                                onClick={() => handleCopy(active.url!, variantKey(active))}>
+                                {copiedKey === variantKey(active) ? (
+                                    <>
+                                        <CheckIcon className="size-4 text-green-500" />
+                                        <span>Link Copied!</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Copy className="size-4" />
+                                        <span>Copy Link {active.size ? `(${active.size})` : `(${tier.label})`}</span>
+                                    </>
+                                )}
+                            </Button>
+                            <div className="flex items-center gap-2 w-full">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-9 flex-1 gap-1.5"
+                                    onClick={() => triggerDownload(active.url!, active.title)}>
+                                    <Download className="size-4" />
+                                    Download
+                                </Button>
+                                <AddSourceButton
+                                    key={sourceKey(active)}
+                                    magnet={active.magnet}
+                                    url={active.url}
+                                    className="h-9 flex-1"
+                                />
+                            </div>
+                            <p className="text-[11px] text-muted-foreground/75 italic text-center leading-tight pt-0.5">
+                                Paste it in your favourite player and stream
+                            </p>
+                        </>
                     )}
-                    <AddSourceButton
-                        key={sourceKey(active)}
-                        magnet={active.magnet}
-                        url={active.url}
-                        className="h-9 w-full sm:h-8"
-                    />
+                    {!active.url && (
+                        <AddSourceButton
+                            key={sourceKey(active)}
+                            magnet={active.magnet}
+                            url={active.url}
+                            className="h-9 w-full sm:h-8"
+                        />
+                    )}
                 </>
             }
             detail={
@@ -372,9 +441,19 @@ export const SourceRow = memo(function SourceRow({
     source: AddonSource;
     request: StreamingRequest;
 }) {
+    const [copied, setCopied] = useState(false);
     const tier = resolutionTier(source.resolution);
     const resolutionLabel = source.resolution || TIERS.find((t) => t.key === tier)?.label;
     const resolutionTone = tier === "uhd" ? "text-primary" : "text-foreground";
+
+    const handleCopy = async () => {
+        if (!source.url) return;
+        const ok = await copyStreamLink(source.url);
+        if (ok) {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2500);
+        }
+    };
 
     return (
         <div className="group/source flex flex-col gap-2 px-3 sm:px-4 md:px-5 py-3 sm:py-3.5 transition-colors border-b border-border/40 last:border-0 hover:bg-muted/20">
@@ -418,17 +497,48 @@ export const SourceRow = memo(function SourceRow({
 
             {/* Controls row — addon kicker (left) + actions (right) */}
             <div className="flex items-center justify-between gap-3 flex-wrap pt-0.5">
-                <div className="text-[10px] sm:text-[11px] tracking-[0.2em] uppercase text-muted-foreground/70">
-                    {source.addonName}
+                <div className="flex flex-col gap-0.5">
+                    <span className="text-[10px] sm:text-[11px] tracking-[0.2em] uppercase text-muted-foreground/70">
+                        {source.addonName}
+                    </span>
+                    {source.url && (
+                        <span className="text-[10px] text-muted-foreground/60 italic hidden sm:inline">
+                            Paste it in your favourite player and stream
+                        </span>
+                    )}
                 </div>
                 {(source.url || source.magnet) && (
                     <div className="flex items-center gap-2 shrink-0">
                         <AddSourceButton magnet={source.magnet} url={source.url} />
                         {source.url && (
-                            <Button size="sm" onClick={() => useStreamingStore.getState().playSource(source, request)}>
-                                <PlayIcon className="size-4 fill-current" />
-                                Play
-                            </Button>
+                            <>
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="gap-1.5 h-8 px-2.5"
+                                    title="Download stream"
+                                    onClick={() => triggerDownload(source.url!, source.title)}>
+                                    <Download className="size-3.5" />
+                                    <span className="hidden sm:inline text-xs">Download</span>
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    className="gap-1.5 h-8 px-2.5"
+                                    title="Copy stream link"
+                                    onClick={handleCopy}>
+                                    {copied ? (
+                                        <>
+                                            <CheckIcon className="size-3.5 text-green-500" />
+                                            <span className="text-xs">Copied!</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Copy className="size-3.5" />
+                                            <span className="text-xs">Copy Link</span>
+                                        </>
+                                    )}
+                                </Button>
+                            </>
                         )}
                     </div>
                 )}

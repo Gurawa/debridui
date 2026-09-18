@@ -20,11 +20,11 @@ const data = {
             url: "/search",
             icon: SearchIcon,
         },
-        {
-            title: "Files",
-            url: "/files",
-            icon: FolderOpen,
-        },
+        // {
+        //     title: "Files",
+        //     url: "/files",
+        //     icon: FolderOpen,
+        // },
         {
             title: "Links",
             url: "/links",

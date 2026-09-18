@@ -269,8 +269,8 @@ const DashboardPage = memo(function DashboardPage() {
 
             {/* Content Sections with lazy loading */}
             <div className="lg:px-6 space-y-16">
-                {/* Addon Catalogs */}
-                <AddonCatalogs />
+                {/* Addon Catalogs (Latest Releases, Popular, etc.) */}
+                {/* <AddonCatalogs /> */}
 
                 {/* Trending */}
                 <ContentSection label="Trending Now" icon={TrendingUp} delay={0}>
