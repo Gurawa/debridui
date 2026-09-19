@@ -17,6 +17,13 @@ export const clearAppCache = async () => {
     }
 };
 
+export const ensureAbsoluteUrl = (url: string): string => {
+    if (typeof window !== "undefined" && url.startsWith("/")) {
+        return `${window.location.origin}${url}`;
+    }
+    return url;
+};
+
 export const cn = (...inputs: ClassValue[]) => {
     return twMerge(clsx(inputs));
 };
@@ -91,10 +98,14 @@ export const calculateAge = (birthDate?: string, endDate?: string): number | nul
 
 export const downloadLinks = async (downloads: DebridLinkInfo[]) => {
     const obfuscated = await Promise.all(
-        downloads.map(async (d) => ({
-            ...d,
-            link: await getObfuscatedStreamUrl(d.link),
-        }))
+        downloads.map(async (d) => {
+            const ob = ensureAbsoluteUrl(await getObfuscatedStreamUrl(d.link));
+            const separator = ob.includes("?") ? "&" : "?";
+            return {
+                ...d,
+                link: `${ob}${separator}download=1&filename=${encodeURIComponent(d.name)}`,
+            };
+        })
     );
 
     const downloadContainer = document.createElement("a");
@@ -104,7 +115,6 @@ export const downloadLinks = async (downloads: DebridLinkInfo[]) => {
     const download = (url: DebridLinkInfo) => {
         downloadContainer.href = url.link;
         downloadContainer.download = url.name;
-        downloadContainer.target = "_blank";
         downloadContainer.click();
     };
 
@@ -120,7 +130,9 @@ export const downloadLinks = async (downloads: DebridLinkInfo[]) => {
 };
 
 export const copyLinksToClipboard = async (links: DebridLinkInfo[]) => {
-    const obfuscated = await Promise.all(links.map((l) => getObfuscatedStreamUrl(l.link)));
+    const obfuscated = await Promise.all(
+        links.map(async (l) => ensureAbsoluteUrl(await getObfuscatedStreamUrl(l.link)))
+    );
     const text = obfuscated.join("\n");
     await navigator.clipboard.writeText(text);
 };

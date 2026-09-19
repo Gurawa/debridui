@@ -11,6 +11,7 @@ import { queryClient } from "@/lib/query-client";
 import { selectBestSource } from "@/lib/streaming/source-selector";
 import type { Media } from "@/lib/tmdb";
 import { MediaPlayer } from "@/lib/types";
+import { ensureAbsoluteUrl } from "@/lib/utils";
 import { useSettingsStore } from "./settings";
 
 export interface StreamingRequest {
@@ -25,7 +26,7 @@ interface StreamingState {
     selectedSource: AddonSource | null;
 
     play: (request: StreamingRequest, addons: Addon[]) => Promise<void>;
-    playSource: (source: AddonSource, request: StreamingRequest) => void;
+    playSource: (source: AddonSource, request: StreamingRequest) => Promise<void> | void;
     cancel: () => void;
 }
 
@@ -93,7 +94,7 @@ function showSourceToast({ source, title, isCached, autoPlay, allowUncached, onP
     const copyLinkAction = async () => {
         if (!source.url) return;
         try {
-            const obfuscatedUrl = await getObfuscatedStreamUrl(source.url);
+            const obfuscatedUrl = ensureAbsoluteUrl(await getObfuscatedStreamUrl(source.url));
             await navigator.clipboard.writeText(obfuscatedUrl);
             toast.success("Stream link copied!", {
                 description: "Paste it in your favourite player and stream",
@@ -127,7 +128,7 @@ export const useStreamingStore = create<StreamingState>()((set, get) => ({
     activeRequest: null,
     selectedSource: null,
 
-    playSource: (source, request) => {
+    playSource: async (source, request) => {
         if (!source.url) return;
 
         const mediaPlayer = useSettingsStore.getState().get("mediaPlayer");
@@ -138,13 +139,20 @@ export const useStreamingStore = create<StreamingState>()((set, get) => ({
         const metaLabel = [source.resolution, source.quality, source.size].filter(Boolean).join(" ");
         const fileName = metaLabel ? `${title} [${metaLabel}]` : title;
 
-        if (mediaPlayer === MediaPlayer.BROWSER) {
-            navigator.clipboard.writeText(source.url);
+        try {
+            const obfuscatedUrl = ensureAbsoluteUrl(await getObfuscatedStreamUrl(source.url));
+
+            await navigator.clipboard.writeText(obfuscatedUrl);
             toast.success("Stream link copied!", {
                 description: "Paste it in your favourite player and stream",
+                duration: 4000,
             });
-        } else {
-            openInPlayer({ url: source.url, fileName, player: mediaPlayer });
+
+            if (mediaPlayer !== MediaPlayer.BROWSER) {
+                openInPlayer({ url: obfuscatedUrl, fileName, player: mediaPlayer });
+            }
+        } catch {
+            toast.error("Failed to copy stream link");
         }
     },
 

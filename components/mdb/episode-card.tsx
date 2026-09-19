@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Play, Star } from "lucide-react";
+import { ChevronDown, Copy, Play, Star } from "lucide-react";
 import { memo, useState } from "react";
 import { WatchButton } from "@/components/common/watch-button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -45,8 +45,8 @@ const ThumbnailContent = memo(function ThumbnailContent({
             {interactive && (
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/thumb:opacity-100 transition-opacity duration-300 bg-black/30">
                     <span className="flex items-center gap-1.5 text-[10px] sm:text-xs tracking-[0.25em] uppercase text-white border border-white/40 px-3 py-1.5 rounded-sm backdrop-blur-sm">
-                        <Play className="size-3 fill-current" />
-                        Watch
+                        <Copy className="size-3" />
+                        Copy Link
                     </span>
                 </div>
             )}

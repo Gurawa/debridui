@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Play, SkipForward, X } from "lucide-react";
+import { Copy, SkipForward, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { memo, useCallback, useMemo, useState } from "react";
@@ -153,20 +153,21 @@ const ContinueWatchingCard = memo(function ContinueWatchingCard({
 
             {/* Action Buttons - Bottom */}
             <div className="absolute inset-x-2.5 bottom-2.5 z-10 flex gap-1.5">
-                {/* Primary Play Button */}
+                {/* Primary Copy Link Button */}
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button
                             size="sm"
                             disabled={isLoading}
                             onClick={onPlay}
-                            className="flex-1 rounded-sm bg-primary/10 hover:bg-primary/20 border border-primary/30 hover:border-primary/50 text-primary transition-colors backdrop-blur-sm"
-                            aria-label={`Play ${entry.title}${episodeLabel ? ` ${episodeLabel}` : ""}`}>
-                            <Play className="size-4 fill-current" />
+                            className="flex-1 rounded-sm bg-primary/10 hover:bg-primary/20 border border-primary/30 hover:border-primary/50 text-primary transition-colors backdrop-blur-sm gap-1.5"
+                            aria-label={`Copy stream link for ${entry.title}${episodeLabel ? ` ${episodeLabel}` : ""}`}>
+                            <Copy className="size-3.5" />
+                            <span className="text-xs font-medium">Copy Link</span>
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                        <p className="text-xs">{episodeLabel ? `Play ${episodeLabel}` : "Play"}</p>
+                        <p className="text-xs">{episodeLabel ? `Copy link for ${episodeLabel}` : "Copy Stream Link"}</p>
                     </TooltipContent>
                 </Tooltip>
 
@@ -180,12 +181,12 @@ const ContinueWatchingCard = memo(function ContinueWatchingCard({
                                 disabled={isLoading}
                                 onClick={onPlayNext}
                                 className="size-8 shrink-0 rounded-sm bg-black/40 hover:bg-black/60 border border-white/10 hover:border-white/20 text-white transition-colors backdrop-blur-sm p-0"
-                                aria-label={`Play next episode`}>
+                                aria-label={`Copy link for next episode`}>
                                 <SkipForward className="size-4" />
                             </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                            <p className="text-xs">Next Episode</p>
+                            <p className="text-xs">Copy Link (Next Episode)</p>
                         </TooltipContent>
                     </Tooltip>
                 )}

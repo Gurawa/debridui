@@ -7,12 +7,13 @@ import { WebDownloadStatusBadge } from "@/components/display";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getObfuscatedStreamUrl } from "@/lib/actions/stream";
 import { openInPlayer } from "@/lib/media/player";
 import { canPreviewFile } from "@/lib/preview/registry";
 import { usePreviewStore } from "@/lib/stores/preview";
 import { useSettingsStore } from "@/lib/stores/settings";
 import { FileType, MediaPlayer, type WebDownload } from "@/lib/types";
-import { cn, formatSize, getFileType } from "@/lib/utils";
+import { cn, ensureAbsoluteUrl, formatSize, getFileType } from "@/lib/utils";
 
 interface DownloadItemProps {
     download: WebDownload;
@@ -58,19 +59,27 @@ export const DownloadItem = memo(function DownloadItem({
     const handleCopy = async () => {
         const link = await getLink("copy");
         if (link) {
-            await navigator.clipboard.writeText(link);
-            toast.success("Link copied to clipboard");
+            const obfuscated = ensureAbsoluteUrl(await getObfuscatedStreamUrl(link));
+            await navigator.clipboard.writeText(obfuscated);
+            toast.success("Stream link copied!", {
+                description: "Paste it in your favourite player and stream",
+            });
         }
     };
 
     const handleDownload = async () => {
         const link = await getLink("download");
         if (link) {
+            const obfuscated = ensureAbsoluteUrl(await getObfuscatedStreamUrl(link));
+            const separator = obfuscated.includes("?") ? "&" : "?";
+            const downloadUrl = `${obfuscated}${separator}download=1&filename=${encodeURIComponent(download.name)}`;
             const a = document.createElement("a");
-            a.href = link;
+            a.href = downloadUrl;
             a.download = download.name;
-            a.target = "_blank";
+            document.body.appendChild(a);
             a.click();
+            document.body.removeChild(a);
+            toast.info("Download started");
         }
     };
 
@@ -78,10 +87,11 @@ export const DownloadItem = memo(function DownloadItem({
         const link = await getLink("preview");
         if (!link) return;
 
+        const obfuscated = ensureAbsoluteUrl(await getObfuscatedStreamUrl(link));
         if (usesExternalPlayer) {
-            openInPlayer({ url: link, fileName: download.name, player: mediaPlayer });
+            openInPlayer({ url: obfuscated, fileName: download.name, player: mediaPlayer });
         } else {
-            openSinglePreview({ url: link, title: download.name, fileType });
+            openSinglePreview({ url: obfuscated, title: download.name, fileType });
         }
     };
 

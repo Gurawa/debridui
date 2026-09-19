@@ -2,7 +2,7 @@
 
 import Autoplay from "embla-carousel-autoplay";
 import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures";
-import { ArrowRightIcon, ChevronLeft, ChevronRight, Play, Star } from "lucide-react";
+import { ArrowRightIcon, ChevronLeft, ChevronRight, Copy, Play, Star } from "lucide-react";
 import Link from "next/link";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { WatchButton } from "@/components/common/watch-button";
@@ -145,8 +145,8 @@ const HeroSlide = memo(function HeroSlide({ item, index, total, isActive }: Hero
                                 {type === "movie" ? (
                                     <WatchButton request={{ imdbId: media.ids?.imdb || "", type, media }}>
                                         <Button size="lg" className="h-11 px-6 gap-2.5">
-                                            <Play className="size-4 fill-current" />
-                                            Watch Now
+                                            <Copy className="size-4" />
+                                            Copy Link
                                         </Button>
                                     </WatchButton>
                                 ) : (
@@ -254,8 +254,8 @@ const HeroSlide = memo(function HeroSlide({ item, index, total, isActive }: Hero
                             {type === "movie" ? (
                                 <WatchButton request={{ imdbId: media.ids?.imdb || "", type, media }}>
                                     <Button className="flex-1 h-10 gap-2">
-                                        <Play className="size-4 fill-current" />
-                                        Watch Now
+                                        <Copy className="size-4" />
+                                        Copy Link
                                     </Button>
                                 </WatchButton>
                             ) : (

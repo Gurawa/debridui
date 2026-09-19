@@ -1,4 +1,4 @@
-import { ArrowUpRightIcon, Play, Star } from "lucide-react";
+import { ArrowUpRightIcon, Copy, Play, Star } from "lucide-react";
 import Link from "next/link";
 import { memo } from "react";
 import { WatchButton } from "@/components/common/watch-button";
@@ -104,8 +104,8 @@ export const MediaHeader = memo(function MediaHeader({ media, type }: MediaHeade
                             {type === "movie" && media.ids?.imdb && (
                                 <WatchButton request={{ imdbId: media.ids.imdb, type: "movie", media }}>
                                     <Button size="lg" className="w-full gap-2">
-                                        <Play className="size-4 fill-current" />
-                                        Watch Now
+                                        <Copy className="size-4" />
+                                        Copy Link
                                     </Button>
                                 </WatchButton>
                             )}
@@ -133,8 +133,8 @@ export const MediaHeader = memo(function MediaHeader({ media, type }: MediaHeade
                             <div className="md:hidden flex gap-2">
                                 <WatchButton request={{ imdbId: media.ids.imdb, type: "movie", media }}>
                                     <Button className="flex-1 gap-2">
-                                        <Play className="size-4 fill-current" />
-                                        Watch Now
+                                        <Copy className="size-4" />
+                                        Copy Link
                                     </Button>
                                 </WatchButton>
                                 {media.trailer && (

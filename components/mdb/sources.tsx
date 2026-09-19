@@ -29,12 +29,12 @@ import type { AddonSource } from "@/lib/addons/types";
 import { useSettingsStore } from "@/lib/stores/settings";
 import { type StreamingRequest, useStreamingStore } from "@/lib/stores/streaming";
 import { selectBestSource } from "@/lib/streaming/source-selector";
-import { cn } from "@/lib/utils";
+import { cn, ensureAbsoluteUrl } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 const copyStreamLink = async (url: string) => {
     try {
-        const obfuscatedUrl = await getObfuscatedStreamUrl(url);
+        const obfuscatedUrl = ensureAbsoluteUrl(await getObfuscatedStreamUrl(url));
         await navigator.clipboard.writeText(obfuscatedUrl);
         toast.success("Stream link copied!", {
             description: "Paste it in your favourite player and stream",
@@ -49,12 +49,16 @@ const copyStreamLink = async (url: string) => {
 
 const triggerDownload = async (url: string, title?: string) => {
     try {
-        const obfuscatedUrl = await getObfuscatedStreamUrl(url);
+        const obfuscatedUrl = ensureAbsoluteUrl(await getObfuscatedStreamUrl(url));
+        const separator = obfuscatedUrl.includes("?") ? "&" : "?";
+        const downloadUrl = title
+            ? `${obfuscatedUrl}${separator}download=1&filename=${encodeURIComponent(title)}`
+            : `${obfuscatedUrl}${separator}download=1`;
         const a = document.createElement("a");
-        a.href = obfuscatedUrl;
-        a.download = title || "";
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
+        a.href = downloadUrl;
+        if (title) {
+            a.download = title;
+        }
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
