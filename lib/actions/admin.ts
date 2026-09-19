@@ -1,46 +1,31 @@
 "use server";
 
 import crypto from "node:crypto";
-import { cookies, headers } from "next/headers";
-import { auth } from "@/lib/auth";
-import { isUserAdmin } from "@/lib/db/admin";
+import { cookies } from "next/headers";
+import { validateAdminPassword } from "@/lib/db/admin";
 
 const ADDONS_COOKIE_NAME = "addons_admin_auth";
 
 function getCookieSignature(): string {
     const secret = process.env.BETTER_AUTH_SECRET || "flix-gurawa-addons-cookie-salt-2026";
-    const adminPassword = process.env.ADMIN_PASSWORD || "admin";
-    return crypto.createHmac("sha256", secret).update(adminPassword).digest("hex");
+    return crypto.createHmac("sha256", secret).update("addons-admin-unlocked-session").digest("hex");
 }
 
 /**
  * Checks whether addons access has been unlocked for the current session.
+ * STRICT: Only returns true if the verified unlock cookie is present.
+ * Never automatically bypasses for any user so that clicking Addons always
+ * prompts for the admin password until unlocked.
  */
 export async function checkAddonsAdminUnlocked(): Promise<boolean> {
-    const adminPassword = process.env.ADMIN_PASSWORD;
-
-    // If no admin password is configured, access is unrestricted
-    if (!adminPassword) {
-        return true;
-    }
-
-    // Check if current user is the admin user (first user created in Neon DB)
     try {
-        const session = await auth.api.getSession({
-            headers: await headers(),
-        });
-        if (session && (await isUserAdmin(session.user.id))) {
+        const cookieStore = await cookies();
+        const cookieValue = cookieStore.get(ADDONS_COOKIE_NAME)?.value;
+        if (cookieValue && cookieValue === getCookieSignature()) {
             return true;
         }
     } catch {
-        // Continue to cookie check
-    }
-
-    // Check for verified session cookie
-    const cookieStore = await cookies();
-    const cookieValue = cookieStore.get(ADDONS_COOKIE_NAME)?.value;
-    if (cookieValue && cookieValue === getCookieSignature()) {
-        return true;
+        // Continue to locked
     }
 
     return false;
@@ -50,13 +35,12 @@ export async function checkAddonsAdminUnlocked(): Promise<boolean> {
  * Verifies the admin password and sets an HTTP-only unlock cookie for the session.
  */
 export async function verifyAddonsAdminPassword(password: string): Promise<{ success: boolean; error?: string }> {
-    const adminPassword = process.env.ADMIN_PASSWORD;
-
-    if (!adminPassword) {
-        return { success: true };
+    if (!password?.trim()) {
+        return { success: false, error: "Please enter the admin password" };
     }
 
-    if (password !== adminPassword) {
+    const isValid = await validateAdminPassword(password.trim());
+    if (!isValid) {
         return { success: false, error: "Incorrect admin password" };
     }
 
@@ -65,9 +49,22 @@ export async function verifyAddonsAdminPassword(password: string): Promise<{ suc
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
-        maxAge: 60 * 60 * 24, // 24 hours
+        maxAge: 60 * 60 * 2, // 2 hours
         path: "/",
     });
 
+    return { success: true };
+}
+
+/**
+ * Locks addons access by clearing the unlock cookie.
+ */
+export async function lockAddonsAdmin(): Promise<{ success: boolean }> {
+    try {
+        const cookieStore = await cookies();
+        cookieStore.delete(ADDONS_COOKIE_NAME);
+    } catch {
+        // Ignore
+    }
     return { success: true };
 }

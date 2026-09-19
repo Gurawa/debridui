@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { useAddAddon, useRemoveAddon, useToggleAddon, useUpdateAddonOrders, useUserAddons } from "@/hooks/use-addons";
-import { checkAddonsAdminUnlocked, verifyAddonsAdminPassword } from "@/lib/actions/admin";
+import { checkAddonsAdminUnlocked, lockAddonsAdmin, verifyAddonsAdminPassword } from "@/lib/actions/admin";
 import { AddonClient } from "@/lib/addons/client";
 import type { Addon } from "@/lib/addons/types";
 import type { CreateAddon } from "@/lib/types";
@@ -29,16 +29,6 @@ const ADDON_PRESETS = [
 ] as const;
 
 export default function AddonsPage() {
-    const { data: serverAddons = [], isLoading, refetch } = useUserAddons();
-    const addAddonMutation = useAddAddon();
-    const removeAddonMutation = useRemoveAddon();
-    const toggleAddonMutation = useToggleAddon();
-    const updateOrdersMutation = useUpdateAddonOrders();
-
-    const [newAddonUrl, setNewAddonUrl] = useState("");
-    const [validating, setValidating] = useState(false);
-    const [addonToDelete, setAddonToDelete] = useState<Addon | null>(null);
-    const [isRefreshing, setIsRefreshing] = useState(false);
     const [isUnlocked, setIsUnlocked] = useState<boolean | null>(null);
     const [adminPasswordInput, setAdminPasswordInput] = useState("");
     const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
@@ -48,6 +38,17 @@ export default function AddonsPage() {
             setIsUnlocked(unlocked);
         });
     }, []);
+
+    const { data: serverAddons = [], isLoading, refetch } = useUserAddons(isUnlocked === true);
+    const addAddonMutation = useAddAddon();
+    const removeAddonMutation = useRemoveAddon();
+    const toggleAddonMutation = useToggleAddon();
+    const updateOrdersMutation = useUpdateAddonOrders();
+
+    const [newAddonUrl, setNewAddonUrl] = useState("");
+    const [validating, setValidating] = useState(false);
+    const [addonToDelete, setAddonToDelete] = useState<Addon | null>(null);
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     const handleUnlock = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -68,6 +69,13 @@ export default function AddonsPage() {
         } finally {
             setIsVerifyingPassword(false);
         }
+    };
+
+    const handleLock = async () => {
+        await lockAddonsAdmin();
+        setIsUnlocked(false);
+        setAdminPasswordInput("");
+        toast.info("Addons access locked");
     };
 
     // Memoize sorted addons to avoid re-sorting on every render
@@ -215,15 +223,26 @@ export default function AddonsPage() {
                 title="Stremio Addons"
                 description="Manage your Stremio addons to fetch sources from multiple providers"
                 primaryAction={
-                    <Button
-                        onClick={handleRefresh}
-                        disabled={isRefreshing || isLoading}
-                        variant="ghost"
-                        size="icon"
-                        aria-label="Refresh"
-                        className="size-8 sm:size-9 -mr-1.5 text-muted-foreground hover:text-foreground">
-                        <RefreshCw className={`size-5! sm:size-[22px]! ${isRefreshing ? "animate-spin" : ""}`} />
-                    </Button>
+                    <div className="flex items-center gap-1 -mr-1.5">
+                        <Button
+                            onClick={handleLock}
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Lock Addons"
+                            title="Lock Addons"
+                            className="size-8 sm:size-9 text-muted-foreground hover:text-foreground">
+                            <Lock className="size-4" />
+                        </Button>
+                        <Button
+                            onClick={handleRefresh}
+                            disabled={isRefreshing || isLoading}
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Refresh"
+                            className="size-8 sm:size-9 text-muted-foreground hover:text-foreground">
+                            <RefreshCw className={`size-5! sm:size-[22px]! ${isRefreshing ? "animate-spin" : ""}`} />
+                        </Button>
+                    </div>
                 }
             />
 

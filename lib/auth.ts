@@ -5,6 +5,8 @@ import { nextCookies } from "better-auth/next-js";
 import { v7 as uuidv7 } from "uuid";
 import { db } from "@/lib/db";
 
+import { validateAdminPassword } from "@/lib/db/admin";
+
 const isGoogleOAuthEnabled = !!(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
 const isEmailSignupDisabled = process.env.NEXT_PUBLIC_DISABLE_EMAIL_SIGNUP === "true";
 const appURL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -51,17 +53,21 @@ export const auth = betterAuth({
     hooks: {
         before: createAuthMiddleware(async (ctx) => {
             if (ctx.path === "/sign-up/email") {
-                const adminPassword = process.env.ADMIN_PASSWORD;
-                if (adminPassword) {
-                    const body = (ctx.body || {}) as Record<string, unknown>;
-                    const providedPassword =
-                        (body.adminPassword as string | undefined) || ctx.headers?.get("x-admin-password");
+                const body = (ctx.body || {}) as Record<string, unknown>;
+                const providedPassword =
+                    (body.adminPassword as string | undefined) || ctx.headers?.get("x-admin-password");
 
-                    if (!providedPassword || providedPassword !== adminPassword) {
-                        throw new APIError("BAD_REQUEST", {
-                            message: "Invalid admin password. Admin password is required to sign up.",
-                        });
-                    }
+                if (!providedPassword || typeof providedPassword !== "string" || !providedPassword.trim()) {
+                    throw new APIError("BAD_REQUEST", {
+                        message: "Admin password is required to create an account.",
+                    });
+                }
+
+                const isValid = await validateAdminPassword(providedPassword.trim());
+                if (!isValid) {
+                    throw new APIError("BAD_REQUEST", {
+                        message: "Invalid admin password. Account registration requires the correct admin password.",
+                    });
                 }
             }
         }),

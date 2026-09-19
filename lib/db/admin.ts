@@ -1,6 +1,7 @@
-import { asc } from "drizzle-orm";
+import { verifyPassword } from "better-auth/crypto";
+import { and, asc, eq, isNotNull } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { user } from "@/lib/db/schema";
+import { account, user } from "@/lib/db/schema";
 
 /**
  * Returns the first user created in the database (earliest createdAt timestamp).
@@ -19,7 +20,8 @@ export async function getFirstUser() {
             .orderBy(asc(user.createdAt))
             .limit(1);
         return first || null;
-    } catch {
+    } catch (error) {
+        console.error("Error fetching first user from database:", error);
         return null;
     }
 }
@@ -40,6 +42,54 @@ export async function isUserAdmin(userId: string): Promise<boolean> {
     const firstUser = await getFirstUser();
     if (firstUser && firstUser.id === userId) {
         return true;
+    }
+
+    return false;
+}
+
+/**
+ * Validates a candidate admin password.
+ * Checks:
+ * 1. ADMIN_PASSWORD environment variable if configured.
+ * 2. The database password of the admin user (first user created in Neon DB, e.g. Gurawa).
+ */
+export async function validateAdminPassword(candidatePassword: string): Promise<boolean> {
+    if (!candidatePassword?.trim()) {
+        return false;
+    }
+
+    const trimmed = candidatePassword.trim();
+
+    // 1. Check ADMIN_PASSWORD environment variable if configured
+    const envAdminPassword = process.env.ADMIN_PASSWORD;
+    if (envAdminPassword && trimmed === envAdminPassword) {
+        return true;
+    }
+
+    // 2. Check the admin user's database password in Neon DB
+    try {
+        const firstUser = await getFirstUser();
+        if (firstUser) {
+            const [adminAccount] = await db
+                .select({
+                    password: account.password,
+                })
+                .from(account)
+                .where(and(eq(account.userId, firstUser.id), isNotNull(account.password)))
+                .limit(1);
+
+            if (adminAccount?.password) {
+                const matches = await verifyPassword({
+                    hash: adminAccount.password,
+                    password: trimmed,
+                });
+                if (matches) {
+                    return true;
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Error validating admin password against database:", error);
     }
 
     return false;
