@@ -8,7 +8,6 @@ const CACHE_DURATION = {
     LONG: 24 * 60 * 60 * 1000, // 24 hours
 } as const;
 
-// biome-ignore lint/suspicious/noExplicitAny: rest tuple type erases call-site inference; replace when a typed alternative emerges
 function createTMDBHook<T extends any[], R>(
     keyParts: string[],
     fn: (client: NonNullable<ReturnType<typeof createTMDBClient>>, ...args: T) => Promise<R>,
@@ -22,13 +21,10 @@ function createTMDBHook<T extends any[], R>(
             queryKey: ["tmdb", ...keyParts, ...args],
             queryFn: async () => {
                 const client = createTMDBClient(apiKey);
-                if (!client) {
-                    throw new Error("TMDB API key is not configured. Please add your API key in Settings.");
-                }
                 return fn(client, ...args);
             },
             staleTime: cacheDuration,
-            enabled: !!apiKey && (argsEnabled ? argsEnabled(...args) : true),
+            enabled: argsEnabled ? argsEnabled(...args) : true,
         });
     };
 }

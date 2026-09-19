@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { v7 as uuidv7 } from "uuid";
 import { z } from "zod";
+import { checkAddonsAdminUnlocked } from "@/lib/actions/admin";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { addons } from "@/lib/db/schema";
@@ -24,6 +25,11 @@ export async function getUserAddons() {
         redirect("/login");
     }
 
+    const isUnlocked = await checkAddonsAdminUnlocked();
+    if (!isUnlocked) {
+        return [];
+    }
+
     const userAddons = await db.select().from(addons).where(eq(addons.userId, session.user.id)).orderBy(addons.order);
 
     return userAddons;
@@ -39,6 +45,11 @@ export async function addAddon(data: CreateAddon) {
 
     if (!session) {
         redirect("/login");
+    }
+
+    const isUnlocked = await checkAddonsAdminUnlocked();
+    if (!isUnlocked) {
+        throw new Error("Admin password required to add addons");
     }
 
     const validated = addonSchema.parse(data);
@@ -84,6 +95,11 @@ export async function removeAddon(addonId: string) {
         redirect("/login");
     }
 
+    const isUnlocked = await checkAddonsAdminUnlocked();
+    if (!isUnlocked) {
+        throw new Error("Admin password required to modify addons");
+    }
+
     const validatedId = z.string().min(1, "Addon ID is required").parse(addonId);
 
     await db.delete(addons).where(and(eq(addons.id, validatedId), eq(addons.userId, session.user.id)));
@@ -102,6 +118,11 @@ export async function toggleAddon(addonId: string, enabled: boolean) {
 
     if (!session) {
         redirect("/login");
+    }
+
+    const isUnlocked = await checkAddonsAdminUnlocked();
+    if (!isUnlocked) {
+        throw new Error("Admin password required to modify addons");
     }
 
     const validatedId = z.string().min(1, "Addon ID is required").parse(addonId);
@@ -127,6 +148,11 @@ export async function updateAddonOrders(updates: { id: string; order: number }[]
 
     if (!session) {
         redirect("/login");
+    }
+
+    const isUnlocked = await checkAddonsAdminUnlocked();
+    if (!isUnlocked) {
+        throw new Error("Admin password required to reorder addons");
     }
 
     const validated = addonOrderUpdateSchema.parse(updates);

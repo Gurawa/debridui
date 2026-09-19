@@ -2,6 +2,7 @@ import { toast } from "sonner";
 import { create } from "zustand";
 import { getStreamCapableAddons } from "@/hooks/use-addons";
 import { recordPlayback } from "@/lib/actions/playback-history";
+import { getObfuscatedStreamUrl } from "@/lib/actions/stream";
 import { AddonClient } from "@/lib/addons/client";
 import { parseStreams } from "@/lib/addons/parser";
 import type { Addon, AddonSource, TvSearchParams } from "@/lib/addons/types";
@@ -9,8 +10,7 @@ import { openInPlayer } from "@/lib/media/player";
 import { queryClient } from "@/lib/query-client";
 import { selectBestSource } from "@/lib/streaming/source-selector";
 import type { Media } from "@/lib/tmdb";
-import { FileType, MediaPlayer } from "@/lib/types";
-import { usePreviewStore } from "./preview";
+import { MediaPlayer } from "@/lib/types";
 import { useSettingsStore } from "./settings";
 
 export interface StreamingRequest {
@@ -93,7 +93,8 @@ function showSourceToast({ source, title, isCached, autoPlay, allowUncached, onP
     const copyLinkAction = async () => {
         if (!source.url) return;
         try {
-            await navigator.clipboard.writeText(source.url);
+            const obfuscatedUrl = await getObfuscatedStreamUrl(source.url);
+            await navigator.clipboard.writeText(obfuscatedUrl);
             toast.success("Stream link copied!", {
                 description: "Paste it in your favourite player and stream",
                 duration: 4000,

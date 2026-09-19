@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import Providers from "./providers";
 
 const siteConfig = {
-    name: "DebridUI",
+    name: "Flix | Gurawa",
     description:
         "A modern debrid client for managing your files, discovering trending movies and shows — with addon support and streaming to your preferred media player.",
     url: "https://debridui.viperadnan.com",

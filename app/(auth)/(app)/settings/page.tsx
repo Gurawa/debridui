@@ -2,9 +2,9 @@
 
 import { format, formatDistanceToNow } from "date-fns";
 import { del } from "idb-keyval";
-import { Clock, Info, Key, Loader2, Monitor, Moon, Play, Settings, Sliders, Sun, Trash2, Zap } from "lucide-react";
+import { Clock, Info, Loader2, Monitor, Moon, Play, Settings, Sliders, Sun, Trash2, Zap } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { useAuthGuaranteed } from "@/components/auth/auth-provider";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -13,7 +13,6 @@ import { SectionDivider } from "@/components/section-divider";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { Label } from "@/components/ui/label";
-import { PasswordInput } from "@/components/ui/password-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useClearPlaybackHistory } from "@/hooks/use-playback-history";
@@ -61,24 +60,11 @@ export default function SettingsPage() {
     const downloadLinkMaxAge = useSettingsStore((s) => s.settings.downloadLinkMaxAge);
     const downloadLinkMaxAgePresets = getPresets("downloadLinkMaxAge") || [];
     const streaming = useSettingsStore((s) => s.settings.streaming);
-    const tmdbApiKey = useSettingsStore((s) => s.settings.tmdbApiKey);
     const { mutate: saveSettings, isPending: isSaving } = useSaveUserSettings();
     const { mutate: clearPlayback } = useClearPlaybackHistory();
     const { mutate: clearSearch } = useClearSearchHistory();
     const [confirmClearPlayback, setConfirmClearPlayback] = useState(false);
     const [confirmClearSearch, setConfirmClearSearch] = useState(false);
-    const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
-
-    const handleTmdbApiKeyChange = useCallback(
-        (value: string) => {
-            set("tmdbApiKey", value);
-            if (debounceRef.current) clearTimeout(debounceRef.current);
-            debounceRef.current = setTimeout(() => {
-                saveSettings({ tmdb_api_key: value });
-            }, 500);
-        },
-        [set, saveSettings]
-    );
 
     const updateStreaming = (updates: Partial<StreamingSettings>) => {
         set("streaming", { ...streaming, ...updates });
@@ -229,38 +215,6 @@ export default function SettingsPage() {
                         <p>{setupInstruction}</p>
                     </div>
                 )}
-            </section>
-
-            {/* API Keys Section */}
-            <section className="space-y-4">
-                <SectionDivider label="API Keys" />
-
-                <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                        <Key className="size-4 text-muted-foreground" />
-                        <Label htmlFor="tmdb-api-key" className="text-sm">
-                            TMDB API Key
-                        </Label>
-                    </div>
-                    <div className="max-w-md">
-                        <PasswordInput
-                            id="tmdb-api-key"
-                            placeholder="Enter your TMDB API key"
-                            value={tmdbApiKey}
-                            onChange={(e) => handleTmdbApiKeyChange(e.target.value)}
-                        />
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                        Needed for episode grouping and enhanced TV show metadata—particularly useful for anime.{" "}
-                        <a
-                            href="https://www.themoviedb.org/settings/api"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline">
-                            Get your API key
-                        </a>
-                    </p>
-                </div>
             </section>
 
             {/* Streaming Section */}

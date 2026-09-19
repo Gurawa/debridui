@@ -16,13 +16,13 @@ export default function OnboardingPage() {
                         <div className="flex size-12 items-center justify-center">
                             <Image
                                 src="/icon.svg"
-                                alt="DebridUI"
+                                alt="Flix | Gurawa"
                                 width={48}
                                 height={48}
                                 className="invert dark:invert-0"
                             />
                         </div>
-                        <span className="sr-only">DebridUI</span>
+                        <span className="sr-only">Flix | Gurawa</span>
                     </Link>
                     <h1 className="text-xl font-bold">Setup Your Account</h1>
                     <p className="text-sm text-muted-foreground text-center">Pick your debrid service to get started</p>

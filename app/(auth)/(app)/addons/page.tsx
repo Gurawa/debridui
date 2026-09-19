@@ -1,7 +1,7 @@
 "use client";
 
-import { ClipboardPaste, Info, Loader2, Plus, Puzzle, RefreshCw, X } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { ClipboardPaste, Info, Loader2, Lock, Plus, Puzzle, RefreshCw, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { AddonCard, AddonCardSkeleton } from "@/components/addon-card";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -10,7 +10,9 @@ import { PageHeader } from "@/components/page-header";
 import { SectionDivider } from "@/components/section-divider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { useAddAddon, useRemoveAddon, useToggleAddon, useUpdateAddonOrders, useUserAddons } from "@/hooks/use-addons";
+import { checkAddonsAdminUnlocked, verifyAddonsAdminPassword } from "@/lib/actions/admin";
 import { AddonClient } from "@/lib/addons/client";
 import type { Addon } from "@/lib/addons/types";
 import type { CreateAddon } from "@/lib/types";
@@ -37,6 +39,36 @@ export default function AddonsPage() {
     const [validating, setValidating] = useState(false);
     const [addonToDelete, setAddonToDelete] = useState<Addon | null>(null);
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [isUnlocked, setIsUnlocked] = useState<boolean | null>(null);
+    const [adminPasswordInput, setAdminPasswordInput] = useState("");
+    const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
+
+    useEffect(() => {
+        checkAddonsAdminUnlocked().then((unlocked) => {
+            setIsUnlocked(unlocked);
+        });
+    }, []);
+
+    const handleUnlock = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!adminPasswordInput.trim()) return;
+
+        setIsVerifyingPassword(true);
+        try {
+            const res = await verifyAddonsAdminPassword(adminPasswordInput);
+            if (res.success) {
+                setIsUnlocked(true);
+                toast.success("Admin access granted");
+                refetch();
+            } else {
+                toast.error(res.error || "Incorrect admin password");
+            }
+        } catch {
+            toast.error("Failed to verify admin password");
+        } finally {
+            setIsVerifyingPassword(false);
+        }
+    };
 
     // Memoize sorted addons to avoid re-sorting on every render
     const sortedAddons = useMemo(() => [...serverAddons].sort((a, b) => a.order - b.order), [serverAddons]);
@@ -124,6 +156,57 @@ export default function AddonsPage() {
             await updateOrdersMutation.mutateAsync(updates);
         }
     };
+
+    if (isUnlocked === null) {
+        return (
+            <div className="mx-auto w-full max-w-4xl space-y-4 sm:space-y-6 py-12 flex flex-col items-center justify-center">
+                <Loader2 className="size-6 animate-spin text-muted-foreground" />
+                <p className="text-xs text-muted-foreground">Checking authorization...</p>
+            </div>
+        );
+    }
+
+    if (isUnlocked === false) {
+        return (
+            <div className="mx-auto w-full max-w-md py-16 px-4 space-y-6">
+                <div className="rounded-lg border border-border/60 bg-card p-6 sm:p-8 space-y-6 shadow-sm">
+                    <div className="flex flex-col items-center text-center gap-3">
+                        <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                            <Lock className="size-6" />
+                        </div>
+                        <h2 className="text-lg sm:text-xl font-semibold tracking-tight">Admin Password Required</h2>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                            Access to Stremio addon configurations is restricted. Please enter the admin password to
+                            continue.
+                        </p>
+                    </div>
+
+                    <form onSubmit={handleUnlock} className="space-y-4">
+                        <PasswordInput
+                            placeholder="Enter admin password"
+                            value={adminPasswordInput}
+                            onChange={(e) => setAdminPasswordInput(e.target.value)}
+                            disabled={isVerifyingPassword}
+                            autoFocus
+                        />
+                        <Button
+                            type="submit"
+                            className="w-full font-medium"
+                            disabled={isVerifyingPassword || !adminPasswordInput.trim()}>
+                            {isVerifyingPassword ? (
+                                <>
+                                    <Loader2 className="mr-2 size-4 animate-spin" />
+                                    Verifying...
+                                </>
+                            ) : (
+                                "Unlock Addons"
+                            )}
+                        </Button>
+                    </form>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="mx-auto w-full max-w-4xl space-y-4 sm:space-y-6 lg:space-y-8 pb-16">

@@ -3,6 +3,7 @@ import { differenceInYears, formatDistanceToNow, formatDuration } from "date-fns
 import { del } from "idb-keyval";
 import { toast } from "sonner";
 import { twMerge } from "tailwind-merge";
+import { getObfuscatedStreamUrl } from "@/lib/actions/stream";
 import { ACCOUNT_TYPE_LABELS, CORS_PROXY_URL, EXTENSION_TO_FILE_TYPE, STREAMING_STORAGE_KEY } from "../constants";
 import { queryClient } from "../query-client";
 import type { AccountType } from "../schemas";
@@ -88,7 +89,14 @@ export const calculateAge = (birthDate?: string, endDate?: string): number | nul
     return differenceInYears(end, birth);
 };
 
-export const downloadLinks = (downloads: DebridLinkInfo[]) => {
+export const downloadLinks = async (downloads: DebridLinkInfo[]) => {
+    const obfuscated = await Promise.all(
+        downloads.map(async (d) => ({
+            ...d,
+            link: await getObfuscatedStreamUrl(d.link),
+        }))
+    );
+
     const downloadContainer = document.createElement("a");
     downloadContainer.style.display = "none";
     document.body.appendChild(downloadContainer);
@@ -102,18 +110,19 @@ export const downloadLinks = (downloads: DebridLinkInfo[]) => {
 
     let index = 0;
     const interval = setInterval(() => {
-        if (index >= downloads.length) {
+        if (index >= obfuscated.length) {
             clearInterval(interval);
             document.body.removeChild(downloadContainer);
             return;
         }
-        download(downloads[index++]);
+        download(obfuscated[index++]);
     }, 1000);
 };
 
-export const copyLinksToClipboard = (links: DebridLinkInfo[]) => {
-    const text = links.map((link) => link.link).join("\n");
-    navigator.clipboard.writeText(text);
+export const copyLinksToClipboard = async (links: DebridLinkInfo[]) => {
+    const obfuscated = await Promise.all(links.map((l) => getObfuscatedStreamUrl(l.link)));
+    const text = obfuscated.join("\n");
+    await navigator.clipboard.writeText(text);
 };
 
 export const getFileType = (name: string): FileType => {

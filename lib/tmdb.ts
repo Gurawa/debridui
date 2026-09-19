@@ -365,7 +365,7 @@ export class TMDBClient {
 
     constructor(config: TMDBClientConfig = {}) {
         this.baseUrl = config.baseUrl || "https://api.themoviedb.org";
-        this.apiKey = config.apiKey || process.env.NEXT_PUBLIC_TMDB_API_KEY;
+        this.apiKey = config.apiKey || process.env.TMDB_API_KEY || process.env.NEXT_PUBLIC_TMDB_API_KEY;
         this.apiVersion = config.apiVersion || "3";
     }
 
@@ -373,40 +373,12 @@ export class TMDBClient {
         this.apiKey = key;
     }
 
-    private getApiKey(): string {
-        if (this.apiKey) return this.apiKey;
-
-        if (typeof window !== "undefined") {
-            try {
-                const stored = localStorage.getItem("debridui-settings");
-                if (stored) {
-                    const parsed = JSON.parse(stored);
-                    const key = parsed?.state?.tmdbApiKey;
-                    if (key) return key;
-                }
-            } catch {}
-        }
-
-        return process.env.NEXT_PUBLIC_TMDB_API_KEY || "";
-    }
-
     private async makeRequest<T>(
         endpoint: string,
         params: Record<string, string | number | boolean | undefined> = {},
         options: RequestInit = {}
     ): Promise<T> {
-        const apiKey = this.getApiKey();
-        if (!apiKey) {
-            throw new TMDBError(
-                "TMDB API key is not configured. Please add NEXT_PUBLIC_TMDB_API_KEY in your environment or enter it in Settings.",
-                401,
-                endpoint
-            );
-        }
-
         const queryParams = new URLSearchParams();
-        queryParams.set("api_key", apiKey);
-
         for (const [key, value] of Object.entries(params)) {
             if (value !== undefined) {
                 queryParams.set(key, String(value));
@@ -414,7 +386,20 @@ export class TMDBClient {
         }
 
         const separator = endpoint.includes("?") ? "&" : "?";
-        const url = `${this.baseUrl}/${this.apiVersion}${endpoint}${separator}${queryParams.toString()}`;
+        const isClient = typeof window !== "undefined";
+        let url: string;
+
+        if (isClient) {
+            const queryString = queryParams.toString() ? `${separator}${queryParams.toString()}` : "";
+            url = `/api/tmdb${endpoint}${queryString}`;
+        } else {
+            const apiKey = process.env.TMDB_API_KEY || process.env.NEXT_PUBLIC_TMDB_API_KEY || this.apiKey || "";
+            if (apiKey) {
+                queryParams.set("api_key", apiKey);
+            }
+            const queryString = queryParams.toString() ? `${separator}${queryParams.toString()}` : "";
+            url = `${this.baseUrl}/${this.apiVersion}${endpoint}${queryString}`;
+        }
 
         try {
             const response = await fetch(url, {
@@ -437,12 +422,10 @@ export class TMDBClient {
 
             return (await response.json()) as T;
         } catch (error) {
-            if (error instanceof TMDBError) {
-                throw error;
-            }
+            if (error instanceof TMDBError) throw error;
             throw new TMDBError(
-                `Request failed: ${error instanceof Error ? error.message : "Unknown error"}`,
-                undefined,
+                error instanceof Error ? error.message : "Network error while contacting TMDB",
+                500,
                 endpoint
             );
         }
@@ -878,8 +861,7 @@ export class TMDBClient {
 
 export const tmdbClient = new TMDBClient();
 
-// Legacy helper for hooks that instantiate dynamically with API key
-export function createTMDBClient(apiKey?: string): TMDBClient | null {
-    if (!apiKey && !process.env.NEXT_PUBLIC_TMDB_API_KEY) return null;
-    return new TMDBClient({ apiKey });
+// Helper for hooks that instantiate dynamically or use default client
+export function createTMDBClient(apiKey?: string): TMDBClient {
+    return apiKey ? new TMDBClient({ apiKey }) : tmdbClient;
 }

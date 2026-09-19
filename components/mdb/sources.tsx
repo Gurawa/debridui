@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useAddonSources } from "@/hooks/use-addons";
+import { getObfuscatedStreamUrl } from "@/lib/actions/stream";
 import { getSourceQualityIndex } from "@/lib/addons/parser";
 import type { AddonSource } from "@/lib/addons/types";
 import { useSettingsStore } from "@/lib/stores/settings";
@@ -33,7 +34,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 
 const copyStreamLink = async (url: string) => {
     try {
-        await navigator.clipboard.writeText(url);
+        const obfuscatedUrl = await getObfuscatedStreamUrl(url);
+        await navigator.clipboard.writeText(obfuscatedUrl);
         toast.success("Stream link copied!", {
             description: "Paste it in your favourite player and stream",
             duration: 4000,
@@ -45,16 +47,21 @@ const copyStreamLink = async (url: string) => {
     }
 };
 
-const triggerDownload = (url: string, title?: string) => {
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = title || "";
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    toast.info("Download started");
+const triggerDownload = async (url: string, title?: string) => {
+    try {
+        const obfuscatedUrl = await getObfuscatedStreamUrl(url);
+        const a = document.createElement("a");
+        a.href = obfuscatedUrl;
+        a.download = title || "";
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        toast.info("Download started");
+    } catch {
+        toast.error("Failed to start download");
+    }
 };
 
 interface SourcesProps {

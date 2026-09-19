@@ -22,6 +22,7 @@ const signupSchema = z.object({
     name: z.string().min(1, "Name is required"),
     email: z.email("Invalid email address"),
     password: z.string().min(8, "Password must be at least 8 characters"),
+    adminPassword: z.string().min(1, "Admin password is required"),
 });
 
 export default function SignupForm() {
@@ -41,16 +42,27 @@ export default function SignupForm() {
             name: "",
             email: "",
             password: "",
+            adminPassword: "",
         },
     });
 
     async function onSubmit(values: z.infer<typeof signupSchema>) {
         try {
-            const { data, error } = await authClient.signUp.email({
-                email: values.email,
-                password: values.password,
-                name: values.name,
-            });
+            const { data, error } = await authClient.signUp.email(
+                {
+                    email: values.email,
+                    password: values.password,
+                    name: values.name,
+                },
+                {
+                    headers: {
+                        "x-admin-password": values.adminPassword,
+                    },
+                    body: {
+                        adminPassword: values.adminPassword,
+                    },
+                }
+            );
 
             if (error) {
                 toast.error(error.message || "Failed to sign up");
@@ -81,13 +93,13 @@ export default function SignupForm() {
                             <div className="flex size-12 items-center justify-center">
                                 <Image
                                     src="/icon.svg"
-                                    alt="DebridUI"
+                                    alt="Flix | Gurawa"
                                     width={48}
                                     height={48}
                                     className="invert dark:invert-0"
                                 />
                             </div>
-                            <span className="sr-only">DebridUI</span>
+                            <span className="sr-only">Flix | Gurawa</span>
                         </Link>
                         <h1 className="text-xl font-bold">Create an Account</h1>
                         <p className="text-sm text-muted-foreground text-center">Sign up to get started</p>
@@ -155,6 +167,23 @@ export default function SignupForm() {
                                                 <FormLabel>Password</FormLabel>
                                                 <FormControl>
                                                     <PasswordInput placeholder="Create a password" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <FormField
+                                        control={form.control}
+                                        name="adminPassword"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Admin Password</FormLabel>
+                                                <FormControl>
+                                                    <PasswordInput
+                                                        placeholder="Enter admin password to sign up"
+                                                        {...field}
+                                                    />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>

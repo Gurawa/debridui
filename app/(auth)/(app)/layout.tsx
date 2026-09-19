@@ -36,11 +36,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                 <SidebarTrigger className="-ml-1 shrink-0 hidden lg:inline-flex" />
                                 <Link
                                     href="/dashboard"
-                                    aria-label="DebridUI home"
+                                    aria-label="Flix | Gurawa home"
                                     className="md:hidden flex items-center -ml-1 px-2 h-9 rounded-sm hover:bg-muted/40 active:bg-muted/50 transition-colors">
                                     <Image
                                         src="/logo.svg"
-                                        alt="DebridUI"
+                                        alt="Flix | Gurawa"
                                         width={88}
                                         height={20}
                                         priority

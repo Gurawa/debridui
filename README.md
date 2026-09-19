@@ -1,22 +1,33 @@
-# DebridUI
+# Flix | Gurawa
 
 <p align="center">
-  <a href="https://debridui.viperadnan.com"><img src="https://img.shields.io/website?url=https%3A%2F%2Fviperadnan.com&label=Deployment&color=brightgreen" alt="Deployment" /></a>
   <a href="https://nextjs.org"><img src="https://img.shields.io/github/package-json/dependency-version/viperadnan-git/debridui/next?logo=next.js&logoColor=white&label=Next.js&color=black" alt="Next.js" /></a>
   <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/github/package-json/dependency-version/viperadnan-git/debridui/dev/typescript?logo=typescript&logoColor=white&label=TypeScript&color=3178C6" alt="TypeScript" /></a>
   <a href="https://tailwindcss.com"><img src="https://img.shields.io/github/package-json/dependency-version/viperadnan-git/debridui/dev/tailwindcss?logo=tailwind-css&logoColor=white&label=Tailwind&color=06B6D4" alt="Tailwind CSS" /></a>
-  <img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/viperadnan-git/debridui?color=%23E8E2D8">
   <a href="./LICENSE"><img src="https://img.shields.io/github/license/viperadnan-git/debridui?color=blue" alt="License" /></a>
 </p>
 
 A modern debrid client for managing your files, discovering trending movies and shows — with addon support and streaming to your preferred media player.
 
 > [!IMPORTANT]
-> This project does not provide, host, or stream any content. DebridUI is a client interface that connects to third-party debrid service APIs to display authorized users' private files and content. [Read full disclaimer](DISCLAIMER.md).
+> This project does not provide, host, or stream any content. Flix | Gurawa is a client interface that connects to third-party debrid service APIs to display authorized users' private files and content. [Read full disclaimer](DISCLAIMER.md).
 
-## Community Hosted Instances
+## Comparison: Flix | Gurawa vs Original DebridUI
 
-- [https://debridui.viperadnan.com](https://debridui.viperadnan.com) - Hosted by creator
+| Feature / Area | Original DebridUI | Flix \| Gurawa |
+| :--- | :--- | :--- |
+| **Media Metadata Provider** | Trakt.tv (API locked behind paid paywall) | **TMDB (The Movie Database)** — free, reliable, with native external IMDb ID mapping |
+| **Stream Link Security** | Raw TorBox / Debrid API tokens exposed directly in URLs | **Obfuscated & Proxied (`/api/stream`)** — tokens encrypted with AES-256-GCM; TorBox CDN redirects resolved server-side |
+| **Addon Access Control** | Open to all registered users without restriction | **Admin Password Protected** — requires admin authentication challenge to view, add, or reorder addons |
+| **User Registration** | Open email registration (or disable flag only) | **Admin Password Required** — registration gated by `ADMIN_PASSWORD` with server-side validation |
+| **Admin Privileges** | No distinction between users | **Dynamic First-User Admin Detection** — first user created in Neon DB dynamically recognized as admin at runtime |
+| **Landing Experience** | Public marketing page with "Get Started" CTA | **Direct Authentication Redirect** — visits to `/` redirect immediately to `/login` or `/dashboard` |
+| **TMDB Configuration** | Required manual user entry of TMDB API key in Settings UI | **Baked-In Default** — server `TMDB_API_KEY` works automatically for all accounts; UI input removed |
+| **Playback & Download Flow** | In-browser media player | Streamlined **"Copy Link"** (with external player reminder) and **direct "Download"** |
+| **Branding & Title** | DebridUI | **Flix \| Gurawa** |
+| **UI Accent Color** | Yellow-gold (`oklch(... 89)`) | **Royal Violet (`#7160db`)** across light & dark themes |
+| **Sensitive Data Display** | Raw usernames and email addresses visible on accounts page | **Privacy-masked** credentials across account cards and switchers |
+| **Dashboard Layout** | Generic catalog rails | Cleaned up, focused media discovery and search |
 
 ## Features
 

@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 import { v7 as uuidv7 } from "uuid";
 import { db } from "@/lib/db";
@@ -46,6 +47,24 @@ export const auth = betterAuth({
             generateId: () => uuidv7(),
         },
         cookiePrefix: "debridui",
+    },
+    hooks: {
+        before: createAuthMiddleware(async (ctx) => {
+            if (ctx.path === "/sign-up/email") {
+                const adminPassword = process.env.ADMIN_PASSWORD;
+                if (adminPassword) {
+                    const body = (ctx.body || {}) as Record<string, unknown>;
+                    const providedPassword =
+                        (body.adminPassword as string | undefined) || ctx.headers?.get("x-admin-password");
+
+                    if (!providedPassword || providedPassword !== adminPassword) {
+                        throw new APIError("BAD_REQUEST", {
+                            message: "Invalid admin password. Admin password is required to sign up.",
+                        });
+                    }
+                }
+            }
+        }),
     },
     plugins: [nextCookies()],
 });

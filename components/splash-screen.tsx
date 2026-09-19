@@ -38,7 +38,7 @@ export const SplashScreen = memo(function SplashScreen() {
                         <div className="relative p-4">
                             <Image
                                 src="/icon.svg"
-                                alt="DebridUI"
+                                alt="Flix | Gurawa"
                                 width={56}
                                 height={56}
                                 className="invert dark:invert-0"
